@@ -85,5 +85,5 @@ expect(parse("1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 == 55")).toBe(1);
 expect(parse("20 - 3 == 17")).toBe(1);
 expect(parse("20 - 3 - 5 == 12")).toBe(1);
 expect(parse("20 - 3 - 5 - 2 == 10")).toBe(1);
-expect(parse("20 - 3 - 5 - 2 - 1 == 10")).toBe(1);
+expect(parse("20 - 3 - 5 - 2 - 1 == 9")).toBe(1);
 expect(parse("400 / 10 / 2 / 4 == 5")).toBe(1);

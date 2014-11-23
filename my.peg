@@ -37,6 +37,7 @@ operatorLevel1
 	/ bitwiseAnd
 	/ bitwiseOr
 	/ bitwiseXor
+	/ subtractionR
 	/ primary
 	
 primary
@@ -145,14 +146,15 @@ multiplication = first:number __  '*' __  second:number
 	}
 
 	
+	
 subtraction
-	=  first:subtractionR __ '-' __  second:number
+	= first:operatorLevel1 __ '-' __  second:operatorLevel2
 		{
 			var result = first - second;
 			//debug('subtraction', result);
 			return result;
 		}
-	/  first:operatorLevel1 __ '-' __  second:operatorLevel2
+	/ first:subtractionR __ '-' __  second:operatorLevel1
 		{
 			var result = first - second;
 			//debug('subtraction', result);
@@ -167,6 +169,7 @@ subtractionR
 			//debug('subtraction', result);
 			return result;
 		}
+
 
 	
 lengthMethod = string:operatorLevel1 '.length'

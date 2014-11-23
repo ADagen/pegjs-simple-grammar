@@ -1,0 +1,309 @@
+start
+	= logicalLevel2
+	
+logicalLevel2
+	= or
+	/ and
+	/ logicalLevel1
+	
+logicalLevel1
+	= not
+	/ comparison
+
+comparison
+	= equalTo
+	/ greaterThen
+	/ greaterOrEqual
+	/ lessThen
+	/ lessOrEqual
+	/ notEqualTo
+	/ operatorLevel3
+	
+operatorLevel3
+	= addition
+	/ operatorLevel2
+	
+operatorLevel2
+	= rand
+	/ subtraction
+	/ hexMethod
+	/ lengthMethod
+	/ operatorLevel1
+
+operatorLevel1
+	= stringConcat
+	/ division
+	/ unaryMinus
+	/ bitwiseAnd
+	/ bitwiseOr
+	/ bitwiseXor
+	/ primary
+	
+primary
+	= leftShift
+	/ rightShift
+	/ substringMethod
+	/ moduleFromDivision
+	/ multiplication
+	/ number
+	/ string
+	/ rand
+	/ variable
+	
+  
+or
+	= left:logicalLevel1 __ 'or' __ right:and
+		{
+			debug('or', left, right);
+			return Number(left || right);
+		}
+	/ left:logicalLevel1 __ '||' __ right:logicalLevel1
+		{
+			debug('or', left, right);
+			return Number(left || right);
+		}
+	/ left:logicalLevel1 __ 'or' __ right:logicalLevel1
+		{
+			debug('or', left, right);
+			return Number(left || right);
+		}
+	
+and
+	= left:logicalLevel1 __ 'and' __ right:or
+		{
+			debug('and', left, right);
+			return Number(left && right);
+		}
+	/ left:logicalLevel1 __ '&&' __ right:logicalLevel1
+		{
+			debug('and', left, right);
+			return Number(left && right);
+		}
+	/ left:logicalLevel1 __ 'and' __ right:logicalLevel1
+		{
+			debug('and', left, right);
+			return Number(left && right);
+		}
+	
+not = __ 'not' __ operand:comparison
+	{
+		return Number(!operand);
+	}
+ 
+  
+equalTo = left:operatorLevel3 __ '==' __ right:operatorLevel3
+	{
+		debug('equalTo',left, right);
+		return Number(left == right);
+	}
+  
+notEqualTo = left:operatorLevel3 __ '!=' __ right:operatorLevel3
+	{
+		debug('notEqualTo',left, right);
+		return Number(left != right);
+	}
+		
+greaterThen = left:operatorLevel3 __ '>' __ right:operatorLevel3
+	{
+		debug('greaterThen',left, right);
+		return Number(left > right);
+	}
+	
+lessThen = left:operatorLevel3 __ '<' __ right:operatorLevel3
+	{
+		debug('lessThen',left, right);
+		return Number(left < right);
+	}
+		
+greaterOrEqual = left:operatorLevel3 __ '>=' __ right:operatorLevel3
+	{
+		debug('greaterOrEqual',left, right);
+		return Number(left >= right);
+	}
+		
+lessOrEqual = left:operatorLevel3 __ '<=' __ right:operatorLevel3
+	{
+		debug('lessOrEqual',left, right);
+		return Number(left <= right);
+	}
+		
+
+	
+addition
+	= first:operatorLevel2 __  '+' __  second:operatorLevel3
+		{
+			var result = Number(first) + Number(second);
+			//debug('addition', result);
+			return result;
+		}
+	
+multiplication = first:number __  '*' __  second:number
+	{
+		var result = Number(first) * Number(second);
+		//debug('multiplication', result);
+		return result;
+	}
+
+	
+subtraction
+	=  first:subtractionR __ '-' __  second:number
+		{
+			var result = first - second;
+			//debug('subtraction', result);
+			return result;
+		}
+	/  first:operatorLevel1 __ '-' __  second:operatorLevel2
+		{
+			var result = first - second;
+			//debug('subtraction', result);
+			return result;
+		}
+	/ subtractionR
+		
+subtractionR
+	= first:number __ '-' __  second:number
+		{
+			var result = first - second;
+			//debug('subtraction', result);
+			return result;
+		}
+
+	
+lengthMethod = string:operatorLevel1 '.length'
+	{ return String(string).length; }
+		
+hexMethod = string:string '.hex'
+	{
+		//debug('hexMethod', string);
+		return parseInt(string, 16);
+	}
+	
+stringConcat
+	= first:primary __ '.' __ second:primary
+		{
+			return String(first) + String(second);
+		}
+	
+substringMethod
+	= string:string '[' begin:number ':' end:number ']' __
+		{
+			//debug('substringMethod_1', string);
+			return string.substring(begin, end);
+		}
+	/ string:string '[:' end:number ']' __
+		{
+			//debug('substringMethod_2', string);
+			return string.substring(0, end);
+		}
+	/ string:string '[' begin:number ':]' __
+		{
+			//debug('substringMethod_3', string);
+			return string.substring(begin);
+		}
+		
+division
+	= first:divisionR __ '/' __ second:primary
+		{
+			var result = first / second;
+			//debug('division', result);
+			return result;
+		}
+	/ divisionR
+				
+divisionR
+	= first:primary __ '/' __ second:primary
+		{
+			var result = first / second;
+			//debug('divisionR', result);
+			return result;
+		}
+		
+		
+		
+bitwiseAnd = first:primary __ '&' __ second:primary
+	{
+		return first & second;
+	}		
+bitwiseOr = first:primary __ '|' __ second:primary
+	{
+		return first | second;
+	}		
+bitwiseXor = first:primary __ '^' __ second:primary
+	{
+		return first ^ second;
+	}	
+
+
+number = hex / decimal
+
+unaryMinus = '-' __  number:primary
+	{ return -number; }
+
+leftShift = source:number __ '<<' __ bits:number
+	{
+		var result = source << bits;
+		//debug('leftShift', source, bits, result);
+		return source << bits;
+	}
+rightShift
+	= source:number __ '>>' __ bits:number
+		{
+			var result = source >> bits;
+			//debug('leftShift', source, bits, result);
+			return source >> bits;
+		}
+	/ source:variable __ '>>' __ bits:number
+		{
+			var result = source >> bits;
+			//debug('leftShift', source, bits, result);
+			return source >> bits;
+		}
+	
+rand = 'rand(' __ primary:number __ ')'
+	{
+		var result = Math.round(Math.random() * primary);
+		//debug('rand', result);
+		return result;
+	}
+
+hex = first:'0x'i rest:[0-9a-f]i*
+	{ return parseInt(first + rest.join(""), 16); }
+
+decimal 
+	= "0"
+        { return 0; }
+	/ first:[1-9] rest:[0-9]*
+        { return parseInt(first + rest.join(""), 10); }
+		
+	
+moduleFromDivision = first:number __ '%' __ second:number
+	{
+		return first % second;
+	}		
+
+
+string = strings:singleString+
+	{
+		var result = strings.join('\'');
+		//debug('string', result);
+		return result;
+	}
+
+singleString = "'" letters:[0-9a-z ]* "'"
+	{
+		var result = letters.join('');
+		//debug('singleString', result);
+		return result;
+	}
+	
+__ = ' '*
+
+variable
+	= 'tasks' 	{ return 1100110011; 	 }
+	/ 'ip'		{ return 0x2FFD0015; 	 }
+	/ 'zip'		{ return 777777; 	 	 }
+	/ 'node'	{ return 1114; 			 }
+	/ 'sn'		{ return "adf1234aa5"; 	 }
+	/ 'mac'		{ return "34a04b55aa55"; }
+	/ 'model'	{ return "4200hd";  	 }
+	

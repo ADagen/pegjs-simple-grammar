@@ -6,6 +6,7 @@
 </head>
 <body>
 Welcome to browser console
+<pre id="grammar"></pre>
 <script type="text/javascript">
     require.config({
         paths: {
@@ -24,6 +25,8 @@ Welcome to browser console
         PEG,
         grammar
     ) {
+        document.getElementById('grammar').innerHTML = grammar;
+
         var _parse = PEG.buildParser(grammar).parse,
             parse = function(source) {
                 try {
